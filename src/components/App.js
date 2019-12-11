@@ -15,6 +15,47 @@ class App extends React.Component {
     }
   }
 
+  onChangeType = event => {
+    // update the state.filters.type
+    //need to pass in an event
+
+    this.setState({
+      filters: {
+        type: event.target.value
+      }
+    })
+
+    // console.log(event.target.value)
+  }
+
+  onFindPetsClick = () => {
+    // fetch a list of pets 
+    // from '/api/pets' for all
+    // from '/api/pets?type=cat
+    // ... for dog or micropig
+    let url
+    const filterType = this.state.filters.type
+
+    filterType === 'all' ? url = '/api/pets' : url = `/api/pets?type=${filterType}`
+
+    fetch(url)
+    .then(resp => resp.json())
+    .then(pets => this.fillPetsArray(pets))
+  }
+
+  fillPetsArray = pets => {
+    this.setState({
+      pets: pets
+    })
+  }
+
+  onAdoptPet = (petId) => {
+    const updatedPets = this.state.pets.map(pet => {
+      return pet.id === petId ? {...pet, isAdopted: true } : pet
+    })
+    this.setState({pets: updatedPets})
+  }
+
   render() {
     return (
       <div className="ui container">
@@ -24,10 +65,10 @@ class App extends React.Component {
         <div className="ui container">
           <div className="ui grid">
             <div className="four wide column">
-              <Filters />
+              <Filters onFindPetsClick={this.onFindPetsClick} onChangeType={this.onChangeType}/>
             </div>
             <div className="twelve wide column">
-              <PetBrowser />
+              <PetBrowser onAdoptPet={this.onAdoptPet} pets={this.state.pets}/>
             </div>
           </div>
         </div>
